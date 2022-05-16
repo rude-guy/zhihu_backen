@@ -1,8 +1,10 @@
 const Koa = require('koa')
-const bodyparser = require('koa-bodyparser')
+const koaBody = require('koa-body')
+const koaStatic = require('koa-static')
 const error = require('koa-json-error')
 const parameter = require('koa-parameter')
 const {connect} = require('mongoose')
+const path = require('path')
 const routing = require('./routes')
 const config = require('./config')
 const app = new Koa()
@@ -16,6 +18,8 @@ connect(config.connectionStr, {
     console.log(e);
 })
 
+app.use(koaStatic(path.join(__dirname, 'public')))
+
 // 错误处理
 app.use(error({
     postFormat: (e, { stack, ...rest }) =>
@@ -23,7 +27,13 @@ app.use(error({
             ? rest : { stack, ...rest }
 }))
 
-app.use(bodyparser())
+app.use(koaBody({
+    multipart: true,
+    formidable: {
+        uploadDir: path.join(__dirname, '/public/uploads'),
+        keepExtensions: true  // 保留拓展名
+    }
+}))
 // 校验参数
 app.use(parameter(app))
 routing(app)
