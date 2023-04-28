@@ -25,6 +25,7 @@ app.use(error({
     postFormat: (e, { stack, ...rest }) =>
         process.env.NODE_ENV === 'production'
             ? rest : { stack, ...rest }
+
 }))
 
 app.use(koaBody({
@@ -32,8 +33,12 @@ app.use(koaBody({
     formidable: {
         uploadDir: path.join(__dirname, '/public/uploads'),
         keepExtensions: true  // 保留拓展名
+    },
+    onFileBegin (name, file) {
+        console.log(name, file)
     }
 }))
+
 // 校验参数
 app.use(parameter(app))
 routing(app)
